@@ -1,6 +1,6 @@
 package hudson.plugins.logparser;
 
-import hudson.model.Hudson;
+import jenkins.model.Jenkins;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,7 @@ public class LogParserConsts {
             .asList(ERROR, WARNING);
 
     public static String getHtmlOpeningTags() {
-        final String hudsonRoot = Hudson.getInstance().getRootUrl();
+        final String hudsonRoot = Jenkins.getInstance().getRootUrl();
         return "<!DOCTYPE html>\n" + "<html>\n" + "\t<head>\n"
                 + "\t\t<title>log-parser plugin page</title>\n"
                 + "\t\t<link type=\"text/css\" rel=\"stylesheet\" href=\""

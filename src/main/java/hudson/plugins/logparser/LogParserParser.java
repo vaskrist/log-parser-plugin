@@ -2,7 +2,7 @@ package hudson.plugins.logparser;
 
 import hudson.FilePath;
 import hudson.console.ConsoleNote;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.remoting.VirtualChannel;
 
 import java.io.BufferedReader;
@@ -40,7 +40,7 @@ public class LogParserParser {
 
     public LogParserParser(final FilePath parsingRulesFile,
             final boolean preformattedHtml, final VirtualChannel channel)
-            throws IOException {
+            throws IOException, InterruptedException {
 
         // init logger
         final Logger logger = Logger.getLogger(getClass().getName());
@@ -69,7 +69,7 @@ public class LogParserParser {
      * lists of links to these errors/warnings/info messages respectively :
      * errorLinks.html, warningLinks.html, infoLinks.html
      */
-    public LogParserResult parseLog(final AbstractBuild build)
+    public LogParserResult parseLog(final Run<?, ?> build)
             throws IOException, InterruptedException {
 
         // init logger
@@ -282,7 +282,7 @@ public class LogParserParser {
             sectionCounter++;
             // This enters a line which will later be replaced by the actual
             // header and count for this header
-            LogParserWriter.writeHeaderTemplateToAllLinkFiles(writers, sectionCounter); 
+            LogParserWriter.writeHeaderTemplateToAllLinkFiles(writers, sectionCounter);
 
             final StringBuffer brShortLink = new StringBuffer("<br/>");
             brShortLink.append(shortLink);
@@ -292,7 +292,7 @@ public class LogParserParser {
         return markedLine.toString();
     }
 
-    private void parseLogBody(final AbstractBuild build,
+    private void parseLogBody(final Run<?, ?> build,
             final BufferedWriter writer, final FilePath filePath,
             final String logFileLocation, final int linesInLog,
             final Logger logger) throws IOException, InterruptedException {

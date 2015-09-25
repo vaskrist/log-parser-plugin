@@ -3,15 +3,16 @@ package hudson.plugins.logparser;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Action;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import hudson.model.Result;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.model.AbstractProject;
 import hudson.plugins.logparser.action.LogParserProjectAction;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
+import jenkins.tasks.SimpleBuildStep;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,20 +22,34 @@ import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
 
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-public class LogParserPublisher extends Recorder implements Serializable {
+public class LogParserPublisher extends Recorder implements Serializable, SimpleBuildStep {
     private static final long serialVersionUID = 1L;
+
+    /** Mark build unstable if warnings found */
     public final boolean unstableOnWarning;
+
+    /** Mark build failed if errors found. */
     public final boolean failBuildOnError;
+
+    /** Show graphs on job page */
     public final boolean showGraphs;
-    public final String parsingRulesPath;
+
+    /** True if we use a project specific rule. */
     public final boolean useProjectRule;
+
+    /** path to project specific rules relative to workspace root. */
     public final String projectRulePath;
+
+    /** Path to the global parsing rules. */
+    public final String parsingRulesPath;
+
 
     /**
      * Create new LogParserPublisher.
-     * 
+     *
      * @param unstableOnWarning
      *            mark build unstable if warnings found.
      * @param failBuildOnError
@@ -48,7 +63,8 @@ public class LogParserPublisher extends Recorder implements Serializable {
      * @param projectRulePath
      *            path to project specific rules relative to workspace root.
      */
-    private LogParserPublisher(final boolean unstableOnWarning,
+    @DataBoundConstructor
+    public LogParserPublisher(final boolean unstableOnWarning,
             final boolean failBuildOnError, final boolean showGraphs,
             final String parsingRulesPath, final boolean useProjectRule,
             final String projectRulePath) {
@@ -62,14 +78,8 @@ public class LogParserPublisher extends Recorder implements Serializable {
     }
 
     @Override
-    public boolean prebuild(final AbstractBuild<?, ?> build,
-            final BuildListener listener) {
-        return true;
-    }
-
-    @Override
-    public boolean perform(final AbstractBuild<?, ?> build,
-            final Launcher launcher, final BuildListener listener)
+    public void perform(final Run<?, ?> build,
+            FilePath workspace, final Launcher launcher, final TaskListener listener)
             throws InterruptedException, IOException {
         final Logger logger = Logger.getLogger(getClass().getName());
         LogParserResult result = new LogParserResult();
@@ -80,8 +90,7 @@ public class LogParserPublisher extends Recorder implements Serializable {
                     .getLegacyFormatting();
             final FilePath parsingRulesFile;
             if (useProjectRule) {
-                parsingRulesFile = new FilePath(build.getWorkspace(),
-                        projectRulePath);
+                parsingRulesFile = new FilePath(workspace, projectRulePath);
             } else {
                 parsingRulesFile = new FilePath(new File(parsingRulesPath));
             }
@@ -117,8 +126,6 @@ public class LogParserPublisher extends Recorder implements Serializable {
         // Add an action created with the above results
         final LogParserAction action = new LogParserAction(build, result);
         build.getActions().add(0, action);
-
-        return true;
     }
 
     @Override
@@ -175,7 +182,7 @@ public class LogParserPublisher extends Recorder implements Serializable {
         /**
          * Cannot use simple DataBoundConstructor due to radioBlock usage where
          * a JSON object is returned holding the selected value of the block.
-         * 
+         *
          * {@inheritDoc}
          */
         @Override

@@ -18,6 +18,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import org.jenkinsci.remoting.Role;
+import org.jenkinsci.remoting.RoleChecker;
+
 public class LogParserStatusComputer implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -62,6 +65,12 @@ public class LogParserStatusComputer implements Serializable {
                         }
                         return result;
                     }
+
+                    @Override
+                    public void checkRoles(RoleChecker checker) throws SecurityException {
+                        checker.check(this, Role.UNKNOWN);
+                    }
+
                 });
         return result;
     }

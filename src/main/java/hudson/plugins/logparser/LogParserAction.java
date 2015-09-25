@@ -2,7 +2,7 @@ package hudson.plugins.logparser;
 
 import hudson.Functions;
 import hudson.model.Action;
-import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import hudson.util.Area;
 import hudson.util.ChartUtil;
 import hudson.util.ColorPalette;
@@ -31,26 +31,26 @@ import org.kohsuke.stapler.StaplerResponse;
 
 public class LogParserAction implements Action {
 
-    final private AbstractBuild<?, ?> build;
+    final private Run<?, ?> build;
     final private LogParserResult result;
 
     private static String urlName = "parsed_console";
 
-    public LogParserAction(final AbstractBuild<?, ?> build,
+    public LogParserAction(final Run<?, ?> build,
             final LogParserResult result) {
         this.build = build;
         this.result = result;
 
     }
-
+    @Override
     public String getIconFileName() {
         return "clipboard.gif";
     }
-
+    @Override
     public String getDisplayName() {
         return "Parsed Console Output";
     }
-
+    @Override
     public String getUrlName() {
         return urlName;
     }
@@ -59,7 +59,7 @@ public class LogParserAction implements Action {
         return urlName;
     }
 
-    public AbstractBuild<?, ?> getOwner() {
+    public Run<?, ?> getOwner() {
         return build;
     }
 
@@ -70,7 +70,7 @@ public class LogParserAction implements Action {
     }
 
     public LogParserAction getPreviousAction() {
-        AbstractBuild<?, ?> build = this.getOwner();
+        Run<?, ?> build = this.getOwner();
 
         while (true) {
 
