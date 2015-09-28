@@ -108,7 +108,7 @@ public abstract class LogParserTestCase {
         if (Functions.isWindows()) {
             project.getBuildersList().add(new BatchFile("@echo \"This is a LogParserTest\" && echo \"INFO\" && echo \"WARN\" && echo \"ERROR\""));
         } else {
-            project.getBuildersList().add(new Shell("echo \"This is a LogParserTest\" && echo \"INFO\" && echo \"WARN\" && echo \"ERROR\""));
+            project.getBuildersList().add(new Shell("#!/bin/bash -l\necho \"This is a LogParserTest\" && echo \"INFO\" && echo \"WARN\" && echo \"ERROR\"\nset -axeE"));
         }
         // Setup SonarQube step
         project.getPublishersList().add(logParser);
