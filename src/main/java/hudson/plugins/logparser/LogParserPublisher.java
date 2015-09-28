@@ -106,11 +106,17 @@ public class LogParserPublisher extends Recorder implements SimpleBuildStep, Ser
 
     @DataBoundSetter
     public void setParsingRulesPath(final String parsingRulesPath) {
+        if (parsingRulesPath != null) {
+            useProjectRule = false;
+        }
         this.parsingRulesPath = parsingRulesPath;
     }
 
     @DataBoundSetter
     public void setProjectRulePath(final String projectRulePath) {
+        if (projectRulePath != null) {
+            useProjectRule = true;
+        }
         this.projectRulePath = projectRulePath;
     }
 

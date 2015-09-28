@@ -29,8 +29,6 @@ public abstract class LogParserTestCase {
     @Rule
     public JenkinsRule j = new JenkinsRule();
     
-    int timeout = j.timeout = 0;
-    
     protected Run<?, ?> build(Job<?, ?> project) throws Exception {
         Cause.UserIdCause cause = new Cause.UserIdCause();
         Run<?, ?> build = null;
@@ -50,15 +48,18 @@ public abstract class LogParserTestCase {
         assertThat(build.getAction(LogParserAction.class)).as(LogParserAction.class.getSimpleName() + " not found")
                 .isNotNull();
                 
-        boolean aborted = Result.ABORTED.equals(build.getResult());
+        boolean aborted = Result.ABORTED == build.getResult();
         
         LogParserResult parserResult = build.getAction(LogParserAction.class).getResult();
         assertThat(parserResult).isNotNull();
         
         if (!aborted) {
-            assertThat(parserResult.getTotalErrors()).isEqualTo(1);
-            assertThat(parserResult.getTotalWarnings()).isEqualTo(1);
-            assertThat(parserResult.getTotalInfos()).isEqualTo(1);
+            assertThat(new int[] {
+                parserResult.getTotalErrors(),
+                parserResult.getTotalWarnings(),
+                parserResult.getTotalInfos(),
+            }).as("Did not evaluate all lines correctly. One more error may be the project log lines creation command showing up in log.")
+            .isEqualTo(new int[] {1, 1, 1});
         }
         
         if (!(project instanceof AbstractProject) || aborted) {
@@ -84,7 +85,7 @@ public abstract class LogParserTestCase {
             // until the block is done, they are in the numbered log filed for each workflow step though
             + "node { \n"
             + "  writeFile file: 'temp.rules', text: \"\"\"error /ERROR/\nwarn /WARN/\ninfo /INFO/\n\"\"\"\n"
-            + "  step([$class: 'LogParserPublisher'" + (broken ? "" : ", failBuildOnError: true, unstableOnWarning: true, showGraphs: true, useProjectRule: true, projectRulePath: 'temp.rules'") + "])\n"
+            + "  step([$class: 'LogParserPublisher'" + (broken ? "" : ", failBuildOnError: true, unstableOnWarning: true, showGraphs: true, projectRulePath: 'temp.rules'") + "])\n"
             + "}\n"
         ));
         return project;
