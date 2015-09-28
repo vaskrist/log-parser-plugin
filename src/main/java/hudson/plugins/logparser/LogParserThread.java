@@ -87,6 +87,9 @@ class LogParserThread extends Thread {
             }
             numOfLines++;
             final String status = getLineStatus(line);
+            
+            logger.warning("[" + status + "] > " + line);
+            
             result[i] = status;
         }
 
