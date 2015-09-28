@@ -58,7 +58,7 @@ public abstract class LogParserTestCase {
                 parserResult.getTotalErrors(),
                 parserResult.getTotalWarnings(),
                 parserResult.getTotalInfos(),
-            }).as("Did not evaluate all lines correctly. One more error may be the project log lines creation command showing up in log.")
+            }).as("Did not evaluate all lines correctly. The result [2,2,2] may be the project log lines creation commands showing up in log twice (eg. -x passed to shell).")
             .isEqualTo(new int[] {1, 1, 1});
         }
         
@@ -108,7 +108,7 @@ public abstract class LogParserTestCase {
         if (Functions.isWindows()) {
             project.getBuildersList().add(new BatchFile("@echo \"This is a LogParserTest\" && echo \"INFO\" && echo \"WARN\" && echo \"ERROR\""));
         } else {
-            project.getBuildersList().add(new Shell("echo \"This is a LogParserTest\" && echo \"INFO\" && echo \"WARN\" && echo \"ERROR\""));
+            project.getBuildersList().add(new Shell("#!/bin/bash -l\necho \"This is a LogParserTest\" && echo \"INFO\" && echo \"WARN\" && echo \"ERROR\""));
         }
         // Setup SonarQube step
         project.getPublishersList().add(logParser);
